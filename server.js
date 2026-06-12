@@ -5,7 +5,10 @@ const fs = require('fs');
 const cors = require('cors');
 
 const app = express();
-const upload = multer({ dest: '/tmp/uploads/' });
+const upload = multer({ 
+  dest: '/tmp/uploads/',
+  limits: { fileSize: 200 * 1024 * 1024 }
+});
 
 app.use(cors());
 
@@ -24,10 +27,13 @@ app.post('/convert', upload.single('video'), async (req, res) => {
   ffmpeg(inputPath)
     .outputOptions([
       '-c:v libx264',
-      '-preset fast',
-      '-crf 23',
+      '-preset ultrafast',
+      '-crf 28',
       '-c:a aac',
-      '-movflags +faststart'
+      '-b:a 96k',
+      '-movflags +faststart',
+      '-threads 1',
+      '-vf scale=720:-2'
     ])
     .output(outputPath)
     .on('end', () => {
